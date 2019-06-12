@@ -21,9 +21,9 @@ build_script:
   - cd build
   - cmake -G "Visual Studio 15 2017 Win64"
       -DCMAKE_PREFIX_PATH="C:/Qt/5.10.1/msvc2017_64/lib/cmake"  
-      -DMPFR_INCLUDE_DIR:PATH="C:/local/vcpkg/installed/x64-windows/include" 
-      -DMPFR_LIBRARIES:FILEPATH="C:/local/vcpkg/installed/x64-windows/lib/mpfr.lib" 
-      -DGMP_INCLUDE_DIR:PATH="C:/local/vcpkg/installed/x64-windows/include" 
-      -DGMP_LIBRARIES:FILEPATH="C:/local/vcpkg/installed/x64-windows/lib/mpir.lib" 
+      -DMPFR_INCLUDE_DIR:PATH="C:/tools/vcpkg/installed/x64-windows/include" 
+      -DMPFR_LIBRARIES:FILEPATH="C:/tools/vcpkg/installed/x64-windows/lib/mpfr.lib" 
+      -DGMP_INCLUDE_DIR:PATH="C:/tools/vcpkg/installed/x64-windows/include" 
+      -DGMP_LIBRARIES:FILEPATH="C:/tools/vcpkg/installed/x64-windows/lib/mpir.lib" 
       -DBOOST_ROOT="C:/Libraries/boost_1_65_1" ../
   - msbuild %MSBuildOptions% fish_deformation.sln
