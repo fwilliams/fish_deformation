@@ -20,13 +20,13 @@ build_script:
   - set PATH=C:\Python%PYTHON%-x64;C:\Python%PYTHON%-x64\Scripts;%PATH%
   - mkdir build
   - cd build
-  - cmake -G 'Visual Studio 15 2017 Win64' 
+  - cmake -G "Visual Studio 15 2017 Win64"
       -DCMAKE_PREFIX_PATH="C:/Qt/Qt5.10.1/5.10.1/msvc2017_64"  
       -DMPFR_INCLUDE_DIR:PATH="C:/local/vcpkg/installed/x64-windows/include" 
       -DMPFR_LIBRARIES:FILEPATH="C:/local/vcpkg/installed/x64-windows/lib/mpfr.lib" 
       -DGMP_INCLUDE_DIR:PATH="C:/local/vcpkg/installed/x64-windows/include" 
       -DGMP_LIBRARIES:FILEPATH="C:/local/vcpkg/installed/x64-windows/lib/mpir.lib" 
-      -DBOOST_ROOT="C:/local/vcpkg/installed/x64-windows" ../
+      -DBOOST_ROOT="C:/Libraries/boost_1_65_1" ../
   - set MSBuildLogger="C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - set MSBuildOptions=/v:m /m /p:BuildInParallel=true /p:Configuration=%CONFIG% /logger:%MSBuildLogger%
-  - msbuild %MSBuildOptions% fish_deformation
+  - msbuild %MSBuildOptions% fish_deformation.sln
