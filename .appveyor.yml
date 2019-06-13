@@ -26,4 +26,16 @@ build_script:
       -DGMP_INCLUDE_DIR:PATH="C:/tools/vcpkg/installed/x64-windows/include" 
       -DGMP_LIBRARIES:FILEPATH="C:/tools/vcpkg/installed/x64-windows/lib/mpir.lib" 
       -DBOOST_ROOT="C:/Libraries/boost_1_65_1" ../
+  - set MSBuildOptions=/v:m /p:Configuration=Release /p:Platform=x64
   - msbuild %MSBuildOptions% fish_deformation.sln
+after_build:
+  - cd ..
+  - mkdir unwind
+  - copy build\src\Release\unwind.exe unwind
+  - copy build\src\Release\mpir.dll unwind
+  - cd C:\Qt\latest\msvc2017_64\bin
+  - windeployqt C:\projects\fish_deformation\unwind\unwind.exe
+  - cd C:\projects\fish_deformation
+  - 7z a unwind.zip .\unwind\*
+artifacts:
+  - path: unwind.zip
