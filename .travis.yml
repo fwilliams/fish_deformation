@@ -12,6 +12,8 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - cmake
+    - g++-6
+    - gcc-6
     - g++-7
     - gcc-7
     - libblas-dev
@@ -31,10 +33,9 @@ addons:
 matrix:
   include:
   - os: linux
-    compiler: gcc # 4.8.4 by default on Trusty
+    compiler: gcc-6
     env:
-    - MATRIX_EVAL="export CONFIG=Release PYTHON=python3"
-    - STDFLAGS="-std=c++11 -std=c++1y"
+    - MATRIX_EVAL="export CC=gcc-6 CXX=g++-6 CONFIG=Release PYTHON=python3"
   - os: linux
     compiler: gcc-7
     env:
