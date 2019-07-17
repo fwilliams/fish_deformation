@@ -68,7 +68,9 @@ void PointLineRenderer::destroy() {
 
 
 bool PointLineRenderer::update_polyline_3d(int polyline_id, GLfloat* vertices, GLfloat* colors, GLsizei num_vertices, PolylineStyle style) {
+#ifdef WIN32
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "update_polyline_3d");
+#endif
     if (polyline_id >= _polylines.size() || polyline_id < 0) {
         return false;
     }
@@ -93,12 +95,16 @@ bool PointLineRenderer::update_polyline_3d(int polyline_id, GLfloat* vertices, G
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+#ifdef WIN32
     glPopDebugGroup();
+#endif
     return true;
 }
 
 bool PointLineRenderer::update_polyline_3d(int polyline_id, GLfloat* vertices, glm::vec4 color, GLsizei num_vertices, PolylineStyle style) {
+#ifdef WIN32
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "update_polyline_3d");
+#endif
     if (polyline_id >= _polylines.size() || polyline_id < 0) {
         return false;
     }
@@ -123,13 +129,17 @@ bool PointLineRenderer::update_polyline_3d(int polyline_id, GLfloat* vertices, g
     glDisableVertexAttribArray(1);
     glBindVertexArray(0);
 
+#ifdef WIN32
     glPopDebugGroup();
+#endif
     return true;
 }
 
 
 int PointLineRenderer::add_polyline_3d(GLfloat* vertices, GLfloat* colors, GLsizei num_vertices, PolylineStyle style) {
+#ifdef WIN32
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "add_polyline_3d");
+#endif
 
     Polyline polyline;
 
@@ -170,13 +180,17 @@ int PointLineRenderer::add_polyline_3d(GLfloat* vertices, GLfloat* colors, GLsiz
         _polylines.push_back(polyline);
     }
 
+#ifdef WIN32
     glPopDebugGroup();
+#endif
 
     return polyline_id;
 }
 
 int PointLineRenderer::add_polyline_3d(GLfloat* vertices, glm::vec4 color, GLsizei num_vertices, PolylineStyle style) {
+#ifdef WIN32
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "add_polyline_3d");
+#endif
 
     Polyline polyline;
 
@@ -210,7 +224,9 @@ int PointLineRenderer::add_polyline_3d(GLfloat* vertices, glm::vec4 color, GLsiz
         _polylines.push_back(polyline);
     }
 
+#ifdef WIN32
     glPopDebugGroup();
+#endif
 
     return polyline_id;
 }

@@ -96,7 +96,11 @@ void Selection_Menu::initialize() {
 void Selection_Menu::draw_selection_volume() {
     int window_width, window_height;
     glfwGetWindowSize(viewer->window, &window_width, &window_height);
+#ifdef __APPLE__
+    Eigen::RowVector4f viewport(2.0*view_hsplit*window_width, 0, 2.0*(1.0-view_hsplit)*window_width, 2.0*window_height);
+#else
     Eigen::RowVector4f viewport(view_hsplit*window_width, 0, (1.0-view_hsplit)*window_width, window_height);
+#endif
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     viewer->core.viewport = viewport;
 
@@ -200,6 +204,28 @@ bool Selection_Menu::key_down(int key, int modifiers) {
         should_select = true;
         return true;
     }
+    return false;
+}
+
+bool Selection_Menu::mouse_down(int button, int modifier) {
+    double current_press_time = glfwGetTime();
+    bool left_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+    bool right_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+    if (left_mouse || right_mouse) {
+        if (!is_first_button_down) {
+            is_first_button_down = left_mouse || right_mouse;
+            mouse_down_time = current_press_time;
+        }
+        else {
+            double delta_time = current_press_time - mouse_down_time;
+            mouse_down_time = 0.0;
+            is_first_button_down = false;
+            if (delta_time < mouse_click_threshold) { // CLICK
+                should_select = true;
+                return true;
+            }
+        }
+    } 
     return false;
 }
 

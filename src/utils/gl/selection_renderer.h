@@ -54,10 +54,16 @@ class SelectionRenderer {
             GLuint program_object = 0;
             GLuint transfer_function_texture;
 
-            GLuint selection_list_ssbo;
-            GLuint contour_information_ssbo;
+            GLuint selection_texture;
+            GLuint contour_texture;
+
+            GLuint selection_list_tbo;
+            GLuint contour_information_tbo;
 
             struct {
+                GLint selection_texture = 0;
+                GLint contour_texture = 0;
+                
                 GLint entry_texture = 0;
                 GLint exit_texture = 0;
                 GLint volume_texture = 0;
@@ -87,6 +93,7 @@ class SelectionRenderer {
             GLuint picking_texture = 0;
 
             struct {
+                GLint contour_texture = 0;
                 GLint entry_texture = 0;
                 GLint exit_texture = 0;
                 GLint volume_texture = 0;
