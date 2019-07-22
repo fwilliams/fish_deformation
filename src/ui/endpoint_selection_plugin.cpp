@@ -115,7 +115,7 @@ void EndPoint_Selection_Menu::initialize() {
     old_viewport = viewer->core.viewport;
 
     int window_width, window_height;
-    glfwGetWindowSize(viewer->window, &window_width, &window_height);
+    state.get_window_size(viewer->window, &window_width, &window_height);
     viewer->core.viewport = Eigen::RowVector4f(view_hsplit*window_width, 0, (1.0-view_hsplit)*window_width, window_height);
 
     if (state.dirty_flags.endpoints_dirty) {
@@ -145,12 +145,12 @@ void EndPoint_Selection_Menu::deinitialize() {
 
 bool EndPoint_Selection_Menu::pre_draw() {
     int window_width, window_height;
-    glfwGetWindowSize(viewer->window, &window_width, &window_height);
-#ifdef __APPLE__
-    viewer->core.viewport = Eigen::RowVector4f(2.0*view_hsplit*window_width, 0, 2.0*(1.0-view_hsplit)*window_width, 2.0*window_height);
-#else
+    state.get_window_size(viewer->window, &window_width, &window_height);
+// #ifdef __APPLE__
+//     window_width *= scaling_factor;
+//     window_height *= scaling_factor;
+// #endif
     viewer->core.viewport = Eigen::RowVector4f(view_hsplit*window_width, 0, (1.0-view_hsplit)*window_width, window_height);
-#endif
 
     bool ret = FishUIViewerPlugin::pre_draw();
     const Eigen::MatrixXd& TV = state.dilated_tet_mesh.TV;
@@ -275,7 +275,7 @@ void EndPoint_Selection_Menu::debug_draw_intermediate_state() {
 bool EndPoint_Selection_Menu::post_draw() {
     bool ret = FishUIViewerPlugin::post_draw();
     int window_width, window_height;
-    glfwGetWindowSize(viewer->window, &window_width, &window_height);
+    state.get_window_size(viewer->window, &window_width, &window_height);
     viewer->core.viewport = Eigen::RowVector4f(view_hsplit*window_width, 0, (1.0-view_hsplit)*window_width, window_height);
 
     int width;

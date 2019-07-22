@@ -161,7 +161,7 @@ struct State {
     } skeleton_estimation_parameters;
 
 
-
+    void get_window_size(GLFWwindow* handle, int* width, int* height);
     void load_volume_data(LoadedVolume& volume, std::string prefix, bool load_topology);
 
     BoundingCage cage;

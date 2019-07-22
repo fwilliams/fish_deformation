@@ -31,6 +31,7 @@ private:
 
     Eigen::Vector4f old_viewport;
 
+    float scaling_factor = 2.f;
     float view_hsplit = 0.2f;
 
     bool selecting_endpoints = false;

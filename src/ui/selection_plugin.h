@@ -12,16 +12,17 @@ struct State;
 class Selection_Menu : public FishUIViewerPlugin {
 public:
     Selection_Menu(State& state);
+    void get_window_size(GLFWwindow* handle, int* width, int* height);
 
     void initialize();
     void deinitialize();
 
     bool key_down(int key, int modifiers) override;
-    bool mouse_down(int button, int modifier) override;
     bool post_draw() override;
 
 private:
     Eigen::RowVector4f old_viewport;
+    float scaling_factor = 2.f;
     float view_hsplit = 0.2f;
 
     void draw_selection_volume();
@@ -30,10 +31,6 @@ private:
 
     Parameters rendering_params;
     SelectionRenderer selection_renderer;
-
-    double mouse_down_time = 0.0;
-    double mouse_click_threshold = 0.2;
-    bool is_first_button_down = false;
 
     glm::vec2 clicked_mouse_position = { 0.f, 0.f };
     bool is_currently_interacting = false;

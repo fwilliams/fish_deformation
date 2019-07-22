@@ -33,7 +33,7 @@ void log_opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity,
         "OpenGL Debug msg: Source: {}, Type: {}, Id: {}, Severity: {}, Message: {}",
         source, type, id, severity, std::string(message)
     );
-#ifdef WIN32
+#if !defined(__APPLE__)
     DebugBreak();
 #endif
 }
@@ -56,7 +56,7 @@ bool init(igl::opengl::glfw::Viewer& viewer) {
     ct_logger->set_level(CONTOURTREE_LOGGER_LEVEL);
     contourtree::Logger::setLogger(ct_logger);
 
-#ifdef WIN32
+#if !defined(__APPLE__)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(log_opengl_debug, NULL);
 #endif

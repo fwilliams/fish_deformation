@@ -1,3 +1,4 @@
+#include "state.h"
 #include "fish_ui_viewer_plugin.h"
 
 #include <igl/project.h>
@@ -102,6 +103,13 @@ bool FishUIViewerPlugin::key_up(int key, int modifiers) {
     return ImGui::GetIO().WantCaptureKeyboard;
 }
 
+void FishUIViewerPlugin::window_size(GLFWwindow* handle, int* width, int* height) {
+    glfwGetWindowSize(handle, width, height);
+#ifdef __APPLE__
+    *width *= 2;
+    *height *= 2;
+#endif
+}
 
 float FishUIViewerPlugin::pixel_ratio() {
     // Computes pixel ratio for hidpi devices
@@ -111,7 +119,7 @@ float FishUIViewerPlugin::pixel_ratio() {
     glfwGetFramebufferSize(window, &buf_size[0], &buf_size[1]);
 
     int win_size[2];
-    glfwGetWindowSize(window, &win_size[0], &win_size[1]);
+    window_size(window, &win_size[0], &win_size[1]);
     return static_cast<float>(buf_size[0]) / static_cast<float>(win_size[0]);
 }
 
@@ -121,6 +129,9 @@ float FishUIViewerPlugin::hidpi_scaling() {
 
     float xscale, yscale;
     glfwGetWindowContentScale(window, &xscale, &yscale);
+#ifdef __APPLE__
+    xscale /= 2, yscale /= 2;
+#endif
 
     return 0.5f * (xscale + yscale);
 }

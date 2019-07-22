@@ -620,9 +620,7 @@ void SelectionRenderer::destroy() {
 }
 
 void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
-#ifdef WIN32
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Update Transfer Function");
-#endif
+    debug_group_action("PUSH", "Update Transfer Function");
 
     constexpr const int TRANSFER_FUNCTION_WIDTH = 512;
 
@@ -696,16 +694,12 @@ void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
         GL_UNSIGNED_BYTE, transfer_function_data.data());
     glBindTexture(GL_TEXTURE_1D, 0);
 
-#ifdef WIN32
-    glPopDebugGroup();
-#endif
+    debug_group_action("POP");
 }
 
 void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_matrix, glm::mat4 proj_matrix)
 {
-#ifdef WIN32
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Render Bounding Box");
-#endif
+    debug_group_action("PUSH", "Render Bounding Box");
 
 
     const glm::vec4 color_transparent(0.0);
@@ -765,15 +759,11 @@ void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_mat
         glDisable(GL_CULL_FACE);
     }
 
-#ifdef WIN32
-    glPopDebugGroup();
-#endif
+    debug_group_action("POP");
 }
 
 void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture, GLuint volume_texture) {
-#ifdef WIN32
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Render Volume");
-#endif
+    debug_group_action("PUSH", "Render Volume");
 
     //
     //  Setup
@@ -869,9 +859,7 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
 
     glBindVertexArray(0);
 
-#ifdef WIN32
-    glPopDebugGroup();
-#endif
+    debug_group_action("POP");
 }
 
 glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mouse_position, GLuint index_texture, GLuint volume_texture) {
@@ -880,9 +868,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindTexture(GL_TEXTURE_3D, index_texture);
     glUniform1i(_gl_state.picking_pass.uniform_location.index_volume, 4);
 
-#ifdef WIN32
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Pick Volume");
-#endif
+    debug_group_action("PUSH", "Pick Volume");
     glBindFramebuffer(GL_FRAMEBUFFER, _gl_state.picking_pass.picking_framebuffer);
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -938,9 +924,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
 
-#ifdef WIN32
-    glPopDebugGroup();
-#endif
+    debug_group_action("POP");
 
     return {
         colors[0],

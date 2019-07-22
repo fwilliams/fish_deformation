@@ -34,6 +34,8 @@ public:
     void draw_text(Eigen::Vector3d pos, Eigen::Vector3d normal,
                    const std::string& text);
 
+    void window_size(GLFWwindow* handle, int* width, int* height);
+
     float pixel_ratio();
     float hidpi_scaling();
     float menu_scaling() { return hidpi_scaling_ / pixel_ratio_; }

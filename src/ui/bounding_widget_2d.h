@@ -39,6 +39,8 @@ public:
     float split_point_size = 7.f;
     float center_point_size = 12.f;
     float selected_center_point_size = 14.f;
+    float view_scaling_factor = 3.f;
+    float widget_scaling_factor = 4.5f;
 
     glm::vec4 rotation_handle_reference_color = glm::vec4(0.5f, 0.5f, 0.2f, 1.0f);
     glm::vec4 rotation_handle_color = glm::vec4(0.9f, 0.9f, 0.2f, 1.0f);

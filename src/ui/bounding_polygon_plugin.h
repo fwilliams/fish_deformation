@@ -70,6 +70,7 @@ private:
     std::string save_name_error_message;
     int output_dims[3] = {-1, -1, -1};
     bool output_preserve_aspect_ratio = true;
+    // bool output_export_hires_texture = true;
 
     double front_bump_amount = 0.0;
     double back_bump_amount = 0.0;
