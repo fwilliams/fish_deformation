@@ -33,7 +33,7 @@ void log_opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity,
         "OpenGL Debug msg: Source: {}, Type: {}, Id: {}, Severity: {}, Message: {}",
         source, type, id, severity, std::string(message)
     );
-#if !defined(__APPLE__)
+#ifdef WIN32
     DebugBreak();
 #endif
 }

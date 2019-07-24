@@ -189,7 +189,7 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
     return true;
 }
 
-void debug_group_action(const std::string& action, const std::string& message) {
+void debug_group_action(const std::string& action, const char* message) {
 #if !defined(__APPLE__)
     if (action == "PUSH") {
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
