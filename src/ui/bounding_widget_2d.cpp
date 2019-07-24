@@ -174,7 +174,7 @@ bool Bounding_Polygon_Widget::is_point_in_widget(glm::ivec2 p) const {
     const glm::ivec2 p_tx(p.x, window_height - p.y);
 #ifdef __APPLE__
     const glm::ivec2 ll = glm::ivec2(position.x, size.y);
-    const glm::ivec2 ur = ll + glm::ivec2(view_scaling_factor*size.y, view_scaling_factor*size.y);
+    const glm::ivec2 ur = ll + glm::ivec2(widget_scaling_factor*size.y, widget_scaling_factor*size.y);
 #else
     const glm::ivec2 ll = position;
     const glm::ivec2 ur = position + size;

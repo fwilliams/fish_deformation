@@ -60,7 +60,11 @@ void Bounding_Polygon_Menu::deinitialize() {
 
 bool Bounding_Polygon_Menu::is_2d_widget_in_focus()  {
     double mouse_x, mouse_y;
+#ifdef __APPLE__
+    mouse_x = viewer->current_mouse_x, mouse_y = viewer->current_mouse_y;
+#else
     glfwGetCursorPos(viewer->window, &mouse_x, &mouse_y);
+#endif
     glm::vec2 p(mouse_x, mouse_y);
     return widget_2d.is_point_in_widget(p) && !mouse_in_popup;
 }
@@ -371,7 +375,7 @@ bool Bounding_Polygon_Menu::post_draw() {
     float window_height_float = static_cast<float>(window_height);
     float window_width_float = static_cast<float>(window_width);
 #ifdef __APPLE__
-    window_height_float /= 2, window_width_float /= 2;
+    window_height_float /= scaling_factor, window_width_float /= scaling_factor;
 #endif
     ImGui::SetNextWindowPos(ImVec2(0.f, (1.0-view_vsplit)*window_height_float), ImGuiSetCond_Always);
     ImGui::SetNextWindowSize(ImVec2(window_width_float, window_height_float*view_vsplit), ImGuiSetCond_Always);
@@ -410,6 +414,9 @@ bool Bounding_Polygon_Menu::post_draw() {
 
     ImGui::SameLine();
     ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+#ifdef __APPLE__
+    cursor_pos.x *= (1.0+keyframe_nudge_amount);
+#endif
     ImGui::PushItemWidth(ImGui::GetWindowWidth() - 2.f*cursor_pos.x);
     if(ImGui::SliderFloat("", &current_cut_index,
                           static_cast<float>(state.cage.min_index()),
