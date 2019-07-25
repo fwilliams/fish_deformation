@@ -44,7 +44,8 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
 
 bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims, std::vector<uint8_t> &out, std::shared_ptr<spdlog::logger> logger);
 
-void init_opengl_debug();
+// void init_opengl_debug(typedef void (APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam) callback);
+void init_opengl_debug(GLDEBUGPROC callback);
 
 void push_gl_debug_group(const char* message);
 

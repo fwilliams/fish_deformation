@@ -40,7 +40,16 @@ public:
     float center_point_size = 12.f;
     float selected_center_point_size = 14.f;
 #ifdef __APPLE__
-    float macos_widget_scaling_factor = 4.5f; // Scaling factor for widget window range on macOS
+    // Ensures full coverage of macOS 2D widget window over the entire area for selection and
+    // rendering covered by 2D widget viewer by scaling up the 2D widget size, which is many 
+    // times smaller than usual since larger widget size values causes the widget view to zoom
+    // out into multiple slice views, ruining the widget display. The value of 4.5 was chosen 
+    // as it was the minimum factor by which the diminished 2D widget size needed to be scaled 
+    // up in order to achieve this effect. The window is 1280 pixels wide and 1132.8 pixels tall
+    // while the area covered by the 2D widget size is initially set at 283.2 pixels tall and 
+    // 640 pixels wide. The y dimension of the 2D widget size (283.2 pixels) was chosen to be 
+    // scaled up due to its more flexible smaller value, dictating the size of the scaling factor.
+    float macos_widget_scaling_factor = 4.5f;
 #endif
 
     glm::vec4 rotation_handle_reference_color = glm::vec4(0.5f, 0.5f, 0.2f, 1.0f);
