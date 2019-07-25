@@ -12,7 +12,6 @@ struct State;
 class Selection_Menu : public FishUIViewerPlugin {
 public:
     Selection_Menu(State& state);
-    void get_window_size(GLFWwindow* handle, int* width, int* height);
 
     void initialize();
     void deinitialize();
@@ -22,7 +21,6 @@ public:
 
 private:
     Eigen::RowVector4f old_viewport;
-    float scaling_factor = 2.f;
     float view_hsplit = 0.2f;
 
     void draw_selection_volume();

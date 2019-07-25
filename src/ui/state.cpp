@@ -36,15 +36,6 @@ void State::LoadedVolume::preprocess_volume_texture(std::vector<uint8_t>& byte_d
     );
 }
 
-
-void State::get_window_size(GLFWwindow* handle, int* width, int* height) {
-    glfwGetWindowSize(handle, width, height);
-#ifdef __APPLE__
-    *width *= 2, *height *= 2;
-#endif
-}
-
-
 void State::load_volume_data(State::LoadedVolume& volume, std::string prefix, bool load_topology) {
     std::string prefix_with_path = input_metadata.output_dir + "/" + prefix;
 
@@ -72,7 +63,6 @@ void State::load_volume_data(State::LoadedVolume& volume, std::string prefix, bo
         file.read(reinterpret_cast<char*>(volume.index_data.data()), num_bytes);
     }
 }
-
 
 void State::LoadedVolume::load_gl_volume_texture(const std::vector<uint8_t>& byte_data) {
     if (byte_data.size() == 0) {

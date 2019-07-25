@@ -42,7 +42,7 @@ void Selection_Menu::initialize() {
     target_viewport_size = { -1.f, -1.f, -1.f, -1.f };
 
     int window_width, window_height;
-    _state.get_window_size(viewer->window, &window_width, &window_height);
+    get_window_size(viewer->window, &window_width, &window_height);
 
     const int maxDim = glm::compMax(rendering_params.volume_dimensions);
     const float md = static_cast<float>(maxDim);
@@ -95,11 +95,7 @@ void Selection_Menu::initialize() {
 
 void Selection_Menu::draw_selection_volume() {
     int window_width, window_height;
-    _state.get_window_size(viewer->window, &window_width, &window_height);
-// #ifdef __APPLE__
-//     window_width *= scaling_factor;
-//     window_height *= scaling_factor;
-// #endif
+    get_window_size(viewer->window, &window_width, &window_height);
     Eigen::RowVector4f viewport(view_hsplit*window_width, 0, (1.0-view_hsplit)*window_width, window_height);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     viewer->core.viewport = viewport;

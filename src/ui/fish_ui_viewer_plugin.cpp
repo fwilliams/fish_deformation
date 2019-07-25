@@ -130,6 +130,7 @@ float FishUIViewerPlugin::hidpi_scaling() {
     float xscale, yscale;
     glfwGetWindowContentScale(window, &xscale, &yscale);
 #ifdef __APPLE__
+    // Offsets high window dpi screen resolution scaling on macOS
     xscale /= 2, yscale /= 2;
 #endif
 

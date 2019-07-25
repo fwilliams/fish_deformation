@@ -8,6 +8,7 @@
 #include "ui/endpoint_selection_plugin.h"
 #include "ui/bounding_polygon_plugin.h"
 #include "ui/state.h"
+#include "utils/utils.h"
 #include "Logger.hpp"
 
 State _state;
@@ -56,10 +57,7 @@ bool init(igl::opengl::glfw::Viewer& viewer) {
     ct_logger->set_level(CONTOURTREE_LOGGER_LEVEL);
     contourtree::Logger::setLogger(ct_logger);
 
-#if !defined(__APPLE__)
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(log_opengl_debug, NULL);
-#endif
+    init_opengl_debug();
 
     return false;
 }

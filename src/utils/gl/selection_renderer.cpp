@@ -620,7 +620,7 @@ void SelectionRenderer::destroy() {
 }
 
 void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
-    debug_group_action("PUSH", "Update Transfer Function");
+    push_gl_debug_group("Update Transfer Function");
 
     constexpr const int TRANSFER_FUNCTION_WIDTH = 512;
 
@@ -694,12 +694,12 @@ void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
         GL_UNSIGNED_BYTE, transfer_function_data.data());
     glBindTexture(GL_TEXTURE_1D, 0);
 
-    debug_group_action("POP");
+    pop_gl_debug_group();
 }
 
 void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_matrix, glm::mat4 proj_matrix)
 {
-    debug_group_action("PUSH", "Render Bounding Box");
+    push_gl_debug_group("Render Bounding Box");
 
 
     const glm::vec4 color_transparent(0.0);
@@ -759,11 +759,11 @@ void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_mat
         glDisable(GL_CULL_FACE);
     }
 
-    debug_group_action("POP");
+    pop_gl_debug_group();
 }
 
 void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture, GLuint volume_texture) {
-    debug_group_action("PUSH", "Render Volume");
+    push_gl_debug_group("Render Volume");
 
     //
     //  Setup
@@ -859,7 +859,7 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
 
     glBindVertexArray(0);
 
-    debug_group_action("POP");
+    pop_gl_debug_group();
 }
 
 glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mouse_position, GLuint index_texture, GLuint volume_texture) {
@@ -868,7 +868,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindTexture(GL_TEXTURE_3D, index_texture);
     glUniform1i(_gl_state.picking_pass.uniform_location.index_volume, 4);
 
-    debug_group_action("PUSH", "Pick Volume");
+    push_gl_debug_group("Pick Volume");
     glBindFramebuffer(GL_FRAMEBUFFER, _gl_state.picking_pass.picking_framebuffer);
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -924,7 +924,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
 
-    debug_group_action("POP");
+    pop_gl_debug_group();
 
     return {
         colors[0],

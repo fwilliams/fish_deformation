@@ -147,7 +147,7 @@ Bounding_Polygon_Widget::Bounding_Polygon_Widget(State& state) : state(state) {}
 glm::vec2 Bounding_Polygon_Widget::convert_position_mainwindow_to_keyframe(const glm::vec2& p) const {
 #ifdef __APPLE__    
     glm::vec2 window_ll = glm::vec2(position.x, size.y);
-    glm::vec2 window_ur = window_ll + glm::vec2(widget_scaling_factor*size.y, widget_scaling_factor*size.y);
+    glm::vec2 window_ur = window_ll + glm::vec2(macos_widget_scaling_factor*size.y, macos_widget_scaling_factor*size.y);
 #else
     glm::vec2 window_ll = position;
     glm::vec2 window_ur = position + size;
@@ -169,12 +169,12 @@ glm::vec2 Bounding_Polygon_Widget::convert_position_keyframe_to_ndc(const glm::v
 bool Bounding_Polygon_Widget::is_point_in_widget(glm::ivec2 p) const {
 
     int window_width, window_height;
-    state.get_window_size(viewer->window, &window_width, &window_height);
+    get_window_size(viewer->window, &window_width, &window_height);
 
     const glm::ivec2 p_tx(p.x, window_height - p.y);
 #ifdef __APPLE__
     const glm::ivec2 ll = glm::ivec2(position.x, size.y);
-    const glm::ivec2 ur = ll + glm::ivec2(widget_scaling_factor*size.y, widget_scaling_factor*size.y);
+    const glm::ivec2 ur = ll + glm::ivec2(macos_widget_scaling_factor*size.y, macos_widget_scaling_factor*size.y);
 #else
     const glm::ivec2 ll = position;
     const glm::ivec2 ur = position + size;
@@ -200,7 +200,7 @@ void Bounding_Polygon_Widget::update_selection() {
     };
 
     glm::ivec2 window_size;
-    state.get_window_size(viewer->window, &window_size.x, &window_size.y);
+    get_window_size(viewer->window, &window_size.x, &window_size.y);
     glm::vec2 current_mouse = { viewer->current_mouse_x, window_size.y - viewer->current_mouse_y }; // In main window pixel space
     glm::vec2 kf_mouse = convert_position_mainwindow_to_keyframe(current_mouse);                    // In keyframe ndc
 
@@ -308,7 +308,7 @@ void Bounding_Polygon_Widget::initialize(igl::opengl::glfw::Viewer* viewer, Boun
 
 bool Bounding_Polygon_Widget::mouse_move(int mouse_x, int mouse_y, bool in_focus) {
     glm::ivec2 window_size;
-    state.get_window_size(viewer->window, &window_size.x, &window_size.y);
+    get_window_size(viewer->window, &window_size.x, &window_size.y);
 
     mouse_state.current_position = glm::ivec2(mouse_x, mouse_y);
     if (!in_focus) { //!is_point_in_widget(glm::ivec2(mouse_x, mouse_y)) ||
@@ -426,7 +426,7 @@ bool Bounding_Polygon_Widget::mouse_move(int mouse_x, int mouse_y, bool in_focus
 
 bool Bounding_Polygon_Widget::mouse_down(int button, int modifier, bool in_focus) {
     glm::ivec2 window_size;
-    state.get_window_size(viewer->window, &window_size.x, &window_size.y);
+    get_window_size(viewer->window, &window_size.x, &window_size.y);
 
     bool left_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
     bool right_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
@@ -574,7 +574,7 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
     //
     // Render the slice of the volume for this keyframe into an OpenGL texture
     //
-    debug_group_action("PUSH", "Render slice");
+    push_gl_debug_group("Render slice");
     {
         glUseProgram(plane.program);
         glBindVertexArray(empty_vao);
@@ -611,13 +611,13 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
         glBindVertexArray(0);
         glUseProgram(0);
     }
-    debug_group_action("POP");
+    pop_gl_debug_group();
 
 
     //
     // Render the bounding-box, center, and axes into the same texture
     //
-    debug_group_action("PUSH", "Render polygon");
+    push_gl_debug_group("Render polygon");
     {
         const glm::vec2 centroid_2d = G2f(kf->centroid_2d());
         const glm::vec2 r_axis = G2f(kf->right_rotated_2d()), u_axis = G2f(kf->up_rotated_2d());
@@ -644,7 +644,7 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
         // Render rotation handle
         if (mouse_state.is_rotate_modifier_down && in_focus) {
             glm::ivec2 window_size;
-            state.get_window_size(viewer->window, &window_size.x, &window_size.y);
+            get_window_size(viewer->window, &window_size.x, &window_size.y);
             glm::vec2 current_mouse = { viewer->current_mouse_x, window_size.y - viewer->current_mouse_y };
             glm::vec2 kf_mouse = convert_position_mainwindow_to_keyframe(current_mouse);
 
@@ -658,7 +658,7 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
             }
         }
     }
-    debug_group_action("POP");
+    pop_gl_debug_group();
 
     // Restore the framebuffer and viewport
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -669,7 +669,7 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
     //
     // Blit the texture we just rendered to the screen
     //
-    debug_group_action("PUSH", "Texture Blit");
+    push_gl_debug_group("Texture Blit");
     {
         int width;
         int height;
@@ -720,7 +720,7 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
         glBindVertexArray(0);
         glUseProgram(0);
     }
-    debug_group_action("POP");
+    pop_gl_debug_group();
     glEnable(GL_DEPTH_TEST);
 
     return false;

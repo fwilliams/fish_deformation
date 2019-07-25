@@ -189,14 +189,30 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
     return true;
 }
 
-void debug_group_action(const std::string& action, const char* message) {
+void init_opengl_debug() {
 #if !defined(__APPLE__)
-    if (action == "PUSH") {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
-    }
-    else if (action == "POP") {
-        glPopDebugGroup();
-    }
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(log_opengl_debug, NULL);
+#endif
+}
+
+void push_gl_debug_group(const char* message) {
+#if !defined(__APPLE__)
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
+#endif
+}
+
+void pop_gl_debug_group() {
+#if !defined(__APPLE__)
+    glPopDebugGroup();
+#endif
+}
+
+void get_window_size(GLFWwindow* handle, int* width, int* height) {
+    glfwGetWindowSize(handle, width, height);
+#ifdef __APPLE__
+    // Provides proper scaling for window dimensions on macOS
+    *width *= 2, *height *= 2;
 #endif
 }
 
