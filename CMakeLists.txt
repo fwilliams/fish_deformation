@@ -3,8 +3,9 @@ project(fish_deformation)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/voroffset/cmake)
-set(CMAKE_PREFIX_PATH /usr/local/opt/qt/lib/cmake)
-
+if (APPLE)
+  set(CMAKE_PREFIX_PATH /usr/local/opt/qt/lib/cmake)
+endif ()
 
 
 #################################
@@ -110,8 +111,12 @@ file(GLOB CT_SRCS external/Segmentangling/ContourTree/*.cpp)
 set(CT_INCLUDE_DIRS external/Segmentangling/ContourTree)
 list(REMOVE_ITEM CT_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/external/Segmentangling/ContourTree/main.cpp")
 add_library(contourtree STATIC ${CT_SRCS})
-# target_compile_options(contourtree PRIVATE "-fopenmp")
-target_link_libraries(contourtree Qt5::Core Qt5::Widgets spdlog)
+if (NOT APPLE)
+  target_compile_options(contourtree PRIVATE "-fopenmp")
+  target_link_libraries(contourtree Qt5::Core Qt5::Widgets -fopenmp spdlog)
+else ()
+  target_link_libraries(contourtree Qt5::Core Qt5::Widgets spdlog)
+endif ()
 target_include_directories(contourtree PUBLIC ${CT_INCLUDE_DIRS})
 target_compile_definitions(contourtree PUBLIC CONTOUR_TREE_USE_SPDLOG)
 
