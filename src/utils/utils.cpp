@@ -189,7 +189,6 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
     return true;
 }
 
-// void init_opengl_debug(void (*)(GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar *, const void *) callback) {
 void init_opengl_debug(GLDEBUGPROC callback) {
 #if !defined(__APPLE__)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
