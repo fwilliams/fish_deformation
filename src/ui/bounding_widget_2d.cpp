@@ -147,7 +147,7 @@ Bounding_Polygon_Widget::Bounding_Polygon_Widget(State& state) : state(state) {}
 glm::vec2 Bounding_Polygon_Widget::convert_position_mainwindow_to_keyframe(const glm::vec2& p) const {
 #ifdef __APPLE__    
     glm::vec2 window_ll = glm::vec2(position.x, size.y);
-    glm::vec2 window_ur = window_ll + glm::vec2(macos_widget_scaling_factor*size.y, macos_widget_scaling_factor*size.y);
+    glm::vec2 window_ur = window_ll + glm::vec2(macos_widget_scaling_factor*size.x, macos_widget_scaling_factor*macos_widget_scaling_factor*size.y);
 #else
     glm::vec2 window_ll = position;
     glm::vec2 window_ur = position + size;
@@ -157,6 +157,10 @@ glm::vec2 Bounding_Polygon_Widget::convert_position_mainwindow_to_keyframe(const
 
     // Convert to [-1, 1]
     glm::vec2 mapped_mouse = (normalized_mouse - glm::vec2(0.5f)) * 2.f;
+
+#ifdef __APPLE__
+    mapped_mouse.y *= mouse_coord_scaling_factor;
+#endif
 
     return mapped_mouse * view.zoom + view.offset;
 }
@@ -173,8 +177,8 @@ bool Bounding_Polygon_Widget::is_point_in_widget(glm::ivec2 p) const {
 
     const glm::ivec2 p_tx(p.x, window_height - p.y);
 #ifdef __APPLE__
-    const glm::ivec2 ll = glm::ivec2(position.x, size.y);
-    const glm::ivec2 ur = ll + glm::ivec2(macos_widget_scaling_factor*size.y, macos_widget_scaling_factor*size.y);
+    glm::vec2 ll = glm::vec2(position.x, size.y);
+    glm::vec2 ur = ll + glm::vec2(macos_widget_scaling_factor*size.x, macos_widget_scaling_factor*macos_widget_scaling_factor*size.y);
 #else
     const glm::ivec2 ll = position;
     const glm::ivec2 ur = position + size;

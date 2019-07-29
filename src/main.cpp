@@ -27,9 +27,11 @@ void log_opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity,
     if (id == 131185 || id == 7 || id == 131218) {
         return;
     }
+#if !defined(__APPLE__)
     if (source == GL_DEBUG_SOURCE_APPLICATION) {
         return;
     }
+#endif
     _state.logger->error(
         "OpenGL Debug msg: Source: {}, Type: {}, Id: {}, Severity: {}, Message: {}",
         source, type, id, severity, std::string(message)
