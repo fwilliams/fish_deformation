@@ -2,6 +2,8 @@
 
 #include "bounding_polygon_plugin.h"
 
+#include "utils/utils.h"
+
 #include <igl/opengl/create_shader_program.h>
 #include <igl/opengl/glfw/Viewer.h>
 #include <imgui/imgui.h>

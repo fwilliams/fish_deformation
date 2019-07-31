@@ -9,6 +9,8 @@
 #include <igl/opengl/create_shader_program.h>
 #include <utils/nrrd/NRRD/nrrd.hxx>
 
+#include "utils/utils.h"
+
 constexpr const char* SLICE_VERTEX_SHADER = R"(
 #version 150
 // Create two triangles that are filling the entire screen [-1, 1]

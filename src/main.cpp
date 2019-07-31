@@ -56,6 +56,7 @@ bool init(igl::opengl::glfw::Viewer& viewer) {
     ct_logger->set_level(CONTOURTREE_LOGGER_LEVEL);
     contourtree::Logger::setLogger(ct_logger);
 
+#if !defined(__APPLE__)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(log_opengl_debug, NULL);
 

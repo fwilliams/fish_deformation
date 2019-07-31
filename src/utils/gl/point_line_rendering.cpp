@@ -1,5 +1,7 @@
 #include "point_line_rendering.h"
 
+#include "utils/utils.h"
+
 #include <igl/opengl/create_shader_program.h>
 
 #include <glm/gtc/type_ptr.hpp>

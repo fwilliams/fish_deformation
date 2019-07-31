@@ -9,6 +9,7 @@
 #include <iostream>
 #include <array>
 
+#include "utils/utils.h"
 
 namespace {
 
