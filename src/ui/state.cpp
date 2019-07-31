@@ -65,7 +65,6 @@ void State::load_volume_data(State::LoadedVolume& volume, std::string prefix, bo
     }
 }
 
-
 void State::LoadedVolume::load_gl_volume_texture(const std::vector<uint8_t>& byte_data) {
     if (byte_data.size() == 0) {
         return;

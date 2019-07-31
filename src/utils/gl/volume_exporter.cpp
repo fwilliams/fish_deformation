@@ -70,7 +70,7 @@ void main() {
 )";
 
 void VolumeExporter::write_texture_data_to_file(std::string filename) {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Export");
+    push_gl_debug_group("Export");
     const size_t num_voxels = size_t(w)*size_t(h)*size_t(d);
     std::vector<std::uint8_t> out_data;
     out_data.resize(num_voxels*4);
@@ -84,7 +84,7 @@ void VolumeExporter::write_texture_data_to_file(std::string filename) {
     real_data.resize(num_voxels);
     for (size_t i = 0; i < num_voxels; i++) { real_data[i] = out_data[4*i]; }
     NRRD::save3D <uint8_t> (filename, real_data.data(), this->w, this->h, this->d);
-    glPopDebugGroup();
+    pop_gl_debug_group();
 }
 
 void VolumeExporter::set_export_dims(GLsizei w, GLsizei h, GLsizei d) {
@@ -105,7 +105,7 @@ void VolumeExporter::destroy() {
 }
 
 void VolumeExporter::init(GLsizei w, GLsizei h, GLsizei d) {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Init Slice");
+    push_gl_debug_group("Init Slice");
     igl::opengl::create_shader_program(SLICE_VERTEX_SHADER,
                                        SLICE_FRAGMENT_SHADER, {}, slice.program);
     slice.ll_location = glGetUniformLocation(slice.program, "ll");
@@ -132,7 +132,7 @@ void VolumeExporter::init(GLsizei w, GLsizei h, GLsizei d) {
     glGenFramebuffers(1, &framebuffer);
 
     glBindTexture(GL_TEXTURE_3D, 0);
-    glPopDebugGroup();
+    pop_gl_debug_group();
 
 }
 
@@ -142,7 +142,7 @@ void VolumeExporter::update(BoundingCage& cage, GLuint volume_texture, glm::ivec
     GLint old_viewport[4];
     glGetIntegerv(GL_VIEWPORT, old_viewport);
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Export Slice");
+    push_gl_debug_group("Export Slice");
     glUseProgram(slice.program);
     glBindVertexArray(empty_vao);
 
@@ -205,7 +205,7 @@ void VolumeExporter::update(BoundingCage& cage, GLuint volume_texture, glm::ivec
     glBindVertexArray(0);
     glUseProgram(0);
     glBindTexture(GL_TEXTURE_3D, 0);
-    glPopDebugGroup();
+    pop_gl_debug_group();
 
     glViewport(old_viewport[0], old_viewport[1], old_viewport[2], old_viewport[3]);
 }

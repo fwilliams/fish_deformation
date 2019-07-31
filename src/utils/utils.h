@@ -7,7 +7,7 @@
 #include <array>
 #include <memory>
 #include <glad/glad.h>
-#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 
 
 #ifdef _MSC_VER
@@ -44,11 +44,12 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
 
 bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims, std::vector<uint8_t> &out, std::shared_ptr<spdlog::logger> logger);
 
-<<<<<<< HEAD
-=======
-void debug_group_action(const std::string& action, const char* message="");
+void init_opengl_debug(GLDEBUGPROC callback);
 
->>>>>>> 35e12f7... Added dependencies for debug group functions
+void push_gl_debug_group(const char* message);
+
+void pop_gl_debug_group();
+
 void edge_endpoints(const Eigen::MatrixXd& V,
                     const Eigen::MatrixXi& F,
                     Eigen::MatrixXd& V1,

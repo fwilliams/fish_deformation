@@ -189,20 +189,25 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
     return true;
 }
 
-<<<<<<< HEAD
-=======
-void debug_group_action(const std::string& action, const char* message) {
+void init_opengl_debug(GLDEBUGPROC callback) {
 #if !defined(__APPLE__)
-    if (action == "PUSH") {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
-    }
-    else if (action == "POP") {
-        glPopDebugGroup();
-    }
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(callback, NULL);
 #endif
 }
 
->>>>>>> 35e12f7... Added dependencies for debug group functions
+void push_gl_debug_group(const char* message) {
+#if !defined(__APPLE__)
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
+#endif
+}
+
+void pop_gl_debug_group() {
+#if !defined(__APPLE__)
+    glPopDebugGroup();
+#endif
+}
+
 void edge_endpoints(const Eigen::MatrixXd& V,
                     const Eigen::MatrixXi& F,
                     Eigen::MatrixXd& V1,

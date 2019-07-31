@@ -59,9 +59,7 @@ void Bounding_Polygon_Menu::deinitialize() {
 }
 
 bool Bounding_Polygon_Menu::is_2d_widget_in_focus()  {
-    double mouse_x, mouse_y;
-    glfwGetCursorPos(viewer->window, &mouse_x, &mouse_y);
-    glm::vec2 p(mouse_x, mouse_y);
+    glm::vec2 p(viewer->current_mouse_x, viewer->current_mouse_y);
     return widget_2d.is_point_in_widget(p) && !mouse_in_popup;
 }
 
@@ -502,10 +500,8 @@ bool Bounding_Polygon_Menu::post_draw() {
         ImVec2 popup_size = ImGui::GetWindowSize();
         tf_widget.post_draw(!show_save_popup /* active */);
 
-        double mouse_x, mouse_y;
-        glfwGetCursorPos(viewer->window, &mouse_x, &mouse_y);
-        bool in_window_x = (mouse_x >= popup_pos[0]) && (mouse_x <= (popup_pos[0] + popup_size[0]));
-        bool in_window_y = (mouse_y >= popup_pos[1]) && (mouse_y <= (popup_pos[1] + popup_size[1]));
+        bool in_window_x = (viewer->current_mouse_x >= popup_pos[0]) && (viewer->current_mouse_x <= (popup_pos[0] + popup_size[0]));
+        bool in_window_y = (viewer->current_mouse_y >= popup_pos[1]) && (viewer->current_mouse_y <= (popup_pos[1] + popup_size[1]));
         mouse_in_popup = (in_window_x && in_window_y);
 
         ImGui::Separator();
