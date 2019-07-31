@@ -44,6 +44,7 @@ private:
 
     void post_draw_transfer_function();
 
+    float scaling_factor = 2.0; // Scaling factor for window sizes of the two menus
     float view_hsplit = 0.5; // Horizontal split for the two menus (normalized distance
     float view_vsplit = 0.2; // Vertical split for the bottom menu (normalized distance from the bottom)
 

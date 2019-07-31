@@ -80,7 +80,7 @@ constexpr const char* VOLUME_PASS_VERTEX_SHADER = R"(
 // 7. Stop if either the ray is exhausted or the combined transparency is above an
 //    early-ray termination threshold (0.99 in this case)
 constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
-#version 450
+#version 410
   // Keep in sync with main.cpp UI_State::Emphasis
   const int SELECTION_EMPHASIS_TYPE_NONE = 0;
   const int SELECTION_EMPHASIS_TYPE_ONSELECTION = 1;
@@ -89,15 +89,8 @@ constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
   in vec2 uv;
   out vec4 out_color;
 
-  layout (std430, binding = 0) buffer Contour {
-      uint nFeatures;
-      uint values[];
-  } contour;
-
-  layout (std430, binding = 1) buffer SelectionList {
-      uint nFeatures;
-      uint features[];
-  } selection;
+  uniform usamplerBuffer contour;
+  uniform usamplerBuffer selection;
 
   uniform sampler2D entry_texture;
   uniform sampler2D exit_texture;
@@ -204,8 +197,8 @@ constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
   }
 
   bool is_feature_selected(uint feature) {
-    for (int i = 0; i < selection.nFeatures; ++i) {
-      if (selection.features[i] == feature) {
+    for (int i = 0; i < int(texelFetch(selection, 0).r); ++i) {
+      if (int(texelFetch(selection, i + 1).r) == feature) {
         return true;
       }
     }
@@ -213,7 +206,7 @@ constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
   }
 
   float selection_factor(bool is_selected) {
-    if (selection.nFeatures == 0) {
+    if (int(texelFetch(selection, 0).r) == 0) {
       return 1.f;
     }
 
@@ -261,13 +254,13 @@ constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
       vec3 sample_pos = entry + t * normalized_ray_direction;
 
       uint segVoxel = texture(index_volume, sample_pos).r;
-      uint feature = contour.values[segVoxel] + 1;
+      uint feature = texelFetch(contour, int(segVoxel) + 1).r + 1;
 
       if (feature != 0) {
         float value = texture(volume_texture, sample_pos).r;
         vec4 color;
         if (color_by_identifier == 1) {
-            const float normFeature = float(feature) / float(contour.nFeatures);
+            float normFeature = float(feature) / float(texelFetch(contour, 0).r);
             color.rgb = colormap(normFeature).rgb;
             color.a = selection_factor(is_feature_selected(feature));
         } else {
@@ -321,15 +314,11 @@ constexpr const char* SELECTION_RENDERING_FRAG_SHADER = R"(
 // 7. Stop if either the ray is exhausted or the combined transparency is above an
 //    early-ray termination threshold (0.99 in this case)
 constexpr const char* SELECTION_PICKING_PASS_FRAG_SHADER = R"(
-#version 450
+#version 410
   in vec2 uv;
   out vec4 out_color;
 
-  layout (std430, binding = 0) buffer Contour {
-      uint nFeatures;
-      uint values[];
-  } contour;
-
+  uniform usamplerBuffer contour;
 
   uniform sampler2D entry_texture;
   uniform sampler2D exit_texture;
@@ -362,8 +351,8 @@ constexpr const char* SELECTION_PICKING_PASS_FRAG_SHADER = R"(
     float t = 0.0;
     while (t < t_end) {
       vec3 sample_pos = entry + t * normalized_ray_direction;
-      const uint segVoxel = texture(index_volume, sample_pos).r;
-      const uint feature = contour.values[segVoxel];
+      uint segVoxel = texture(index_volume, sample_pos).r;
+      uint feature = texelFetch(contour, int(segVoxel) + 1).r;
       if (feature != -1) {
         out_color = vec4(vec3(float(feature + 1)), 1.0);
         return;
@@ -450,6 +439,11 @@ void SelectionRenderer::initialize(const glm::ivec2& viewport_size)
     igl::opengl::create_shader_program(VOLUME_PASS_VERTEX_SHADER, SELECTION_RENDERING_FRAG_SHADER, {},
         _gl_state.volume_pass.program_object);
 
+    _gl_state.volume_pass.uniform_location.contour_texture = glGetUniformLocation(
+        _gl_state.volume_pass.program_object, "contour");
+    _gl_state.volume_pass.uniform_location.selection_texture = glGetUniformLocation(
+        _gl_state.volume_pass.program_object, "selection");
+  
     _gl_state.volume_pass.uniform_location.entry_texture = glGetUniformLocation(
         _gl_state.volume_pass.program_object, "entry_texture");
     _gl_state.volume_pass.uniform_location.exit_texture = glGetUniformLocation(
@@ -490,6 +484,10 @@ void SelectionRenderer::initialize(const glm::ivec2& viewport_size)
     igl::opengl::create_shader_program(VOLUME_PASS_VERTEX_SHADER,
         SELECTION_PICKING_PASS_FRAG_SHADER, {},
         _gl_state.picking_pass.program_object);
+    _gl_state.picking_pass.uniform_location.contour_texture =
+        glGetUniformLocation(
+            _gl_state.picking_pass.program_object, "contour"
+        );
     _gl_state.picking_pass.uniform_location.entry_texture =
         glGetUniformLocation(
             _gl_state.picking_pass.program_object, "entry_texture"
@@ -574,9 +572,19 @@ void SelectionRenderer::initialize(const glm::ivec2& viewport_size)
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
 
-    // SSBO
-    glGenBuffers(1, &_gl_state.volume_pass.contour_information_ssbo);
-    glGenBuffers(1, &_gl_state.volume_pass.selection_list_ssbo);
+    // Initialize contour buffer texture
+    glGenTextures(1, &_gl_state.volume_pass.contour_texture);
+    glBindTexture(GL_TEXTURE_BUFFER, _gl_state.volume_pass.contour_texture);
+
+
+    // Initialize selection buffer texture
+    glGenTextures(1, &_gl_state.volume_pass.selection_texture);
+    glBindTexture(GL_TEXTURE_BUFFER, _gl_state.volume_pass.selection_texture);
+
+
+    // Contour and selection texture buffer objects
+    glGenBuffers(1, &_gl_state.volume_pass.contour_information_tbo);
+    glGenBuffers(1, &_gl_state.volume_pass.selection_list_tbo);
 
 }
 
@@ -585,13 +593,15 @@ void SelectionRenderer::destroy() {
     std::vector<GLuint> buffers = {
         _gl_state.geometry_pass.vbo,
         _gl_state.geometry_pass.ibo,
-        _gl_state.volume_pass.contour_information_ssbo,
-        _gl_state.volume_pass.selection_list_ssbo };
+        _gl_state.volume_pass.contour_information_tbo,
+        _gl_state.volume_pass.selection_list_tbo };
     std::vector<GLuint> textures = {
         _gl_state.geometry_pass.entry_texture,
         _gl_state.geometry_pass.exit_texture,
         _gl_state.volume_pass.transfer_function_texture,
-        _gl_state.picking_pass.picking_texture,
+        _gl_state.volume_pass.selection_texture,
+        _gl_state.volume_pass.contour_texture,
+        _gl_state.picking_pass.picking_texture
     };
     std::vector<GLuint> framebuffers = {
         _gl_state.geometry_pass.entry_framebuffer,
@@ -610,7 +620,7 @@ void SelectionRenderer::destroy() {
 }
 
 void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Update Transfer Function");
+    push_gl_debug_group("Update Transfer Function");
 
     constexpr const int TRANSFER_FUNCTION_WIDTH = 512;
 
@@ -684,12 +694,12 @@ void SelectionRenderer::set_transfer_function(const std::vector<TfNode> &tf) {
         GL_UNSIGNED_BYTE, transfer_function_data.data());
     glBindTexture(GL_TEXTURE_1D, 0);
 
-    glPopDebugGroup();
+    pop_gl_debug_group();
 }
 
 void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_matrix, glm::mat4 proj_matrix)
 {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Render Bounding Box");
+    push_gl_debug_group("Render Bounding Box");
 
 
     const glm::vec4 color_transparent(0.0);
@@ -749,11 +759,11 @@ void SelectionRenderer::geometry_pass(glm::mat4 model_matrix, glm::mat4 view_mat
         glDisable(GL_CULL_FACE);
     }
 
-    glPopDebugGroup();
+    pop_gl_debug_group();
 }
 
 void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture, GLuint volume_texture) {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Render Volume");
+    push_gl_debug_group("Render Volume");
 
     //
     //  Setup
@@ -771,12 +781,10 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
 
 
     // Contour Buffer
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_state.volume_pass.contour_information_ssbo);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, _gl_state.volume_pass.contour_information_ssbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, _gl_state.volume_pass.contour_information_tbo);
 
     // Selection Buffer
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_state.volume_pass.selection_list_ssbo);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, _gl_state.volume_pass.selection_list_ssbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, _gl_state.volume_pass.selection_list_tbo);
 
     glUniform1i(_gl_state.volume_pass.uniform_location.color_by_identifier, parameters.color_by_id ? 1 : 0);
 
@@ -794,7 +802,7 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
     // Exit points texture
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _gl_state.geometry_pass.exit_texture);
-    glUniform1i(_gl_state.volume_pass.uniform_location.entry_texture, 1);
+    glUniform1i(_gl_state.volume_pass.uniform_location.exit_texture, 1);
 
     // Volume texture
     glActiveTexture(GL_TEXTURE2);
@@ -810,6 +818,18 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_3D, index_texture);
     glUniform1i(_gl_state.volume_pass.uniform_location.index_volume, 4);
+    
+    // Contour buffer texture
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_BUFFER, _gl_state.volume_pass.contour_texture);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, _gl_state.volume_pass.contour_information_tbo);
+    glUniform1i(_gl_state.volume_pass.uniform_location.contour_texture, 5);
+
+    // Selection buffer texture
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_BUFFER, _gl_state.volume_pass.selection_texture);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, _gl_state.volume_pass.selection_list_tbo);
+    glUniform1i(_gl_state.volume_pass.uniform_location.selection_texture, 6);
 
     glUniform1f(_gl_state.volume_pass.uniform_location.sampling_rate, parameters.sampling_rate);
 
@@ -839,7 +859,7 @@ void SelectionRenderer::volume_pass(Parameters parameters, GLuint index_texture,
 
     glBindVertexArray(0);
 
-    glPopDebugGroup();
+    pop_gl_debug_group();
 }
 
 glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mouse_position, GLuint index_texture, GLuint volume_texture) {
@@ -848,7 +868,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindTexture(GL_TEXTURE_3D, index_texture);
     glUniform1i(_gl_state.picking_pass.uniform_location.index_volume, 4);
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Pick Volume");
+    push_gl_debug_group("Pick Volume");
     glBindFramebuffer(GL_FRAMEBUFFER, _gl_state.picking_pass.picking_framebuffer);
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -863,7 +883,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     // Exit points texture
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _gl_state.geometry_pass.exit_texture);
-    glUniform1i(_gl_state.picking_pass.uniform_location.entry_texture, 1);
+    glUniform1i(_gl_state.picking_pass.uniform_location.exit_texture, 1);
 
     // Volume texture
     glActiveTexture(GL_TEXTURE2);
@@ -874,6 +894,12 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_1D, _gl_state.volume_pass.transfer_function_texture);
     glUniform1i(_gl_state.picking_pass.uniform_location.transfer_function, 3);
+    
+    // Contour buffer texture
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_BUFFER, _gl_state.volume_pass.contour_texture);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32UI, _gl_state.volume_pass.contour_information_tbo);
+    glUniform1i(_gl_state.picking_pass.uniform_location.contour_texture, 5);
 
     glUniform1f(_gl_state.picking_pass.uniform_location.sampling_rate,
         parameters.sampling_rate);
@@ -898,7 +924,7 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindVertexArray(0);
 
-    glPopDebugGroup();
+    pop_gl_debug_group();
 
     return {
         colors[0],
@@ -908,15 +934,15 @@ glm::vec3 SelectionRenderer::picking_pass(Parameters parameters, glm::ivec2 mous
 }
 
 void SelectionRenderer::set_contour_data(uint32_t* contour_features, size_t num_features) {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_state.volume_pass.contour_information_ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(uint32_t) * num_features, contour_features, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glBindBuffer(GL_TEXTURE_BUFFER, _gl_state.volume_pass.contour_information_tbo);
+    glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * num_features, contour_features, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void SelectionRenderer::set_selection_data(uint32_t* selection_list, size_t num_features) {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_state.volume_pass.selection_list_ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(uint32_t) * num_features, selection_list, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glBindBuffer(GL_TEXTURE_BUFFER, _gl_state.volume_pass.selection_list_tbo);
+    glBufferData(GL_TEXTURE_BUFFER, sizeof(uint32_t) * num_features, selection_list, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
 }
 
 void SelectionRenderer::resize_framebuffer(glm::ivec2 framebuffer_size) {

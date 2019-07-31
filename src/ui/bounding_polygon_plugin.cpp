@@ -59,9 +59,7 @@ void Bounding_Polygon_Menu::deinitialize() {
 }
 
 bool Bounding_Polygon_Menu::is_2d_widget_in_focus()  {
-    double mouse_x, mouse_y;
-    glfwGetCursorPos(viewer->window, &mouse_x, &mouse_y);
-    glm::vec2 p(mouse_x, mouse_y);
+    glm::vec2 p(viewer->current_mouse_x, viewer->current_mouse_y);
     return widget_2d.is_point_in_widget(p) && !mouse_in_popup;
 }
 
@@ -344,10 +342,15 @@ bool Bounding_Polygon_Menu::post_draw() {
     bool ret = FishUIViewerPlugin::post_draw();
 
     int window_width, window_height;
-    glfwGetWindowSize(viewer->window, &window_width, &window_height);
+    get_window_size(viewer->window, &window_width, &window_height);
+#ifdef __APPLE__
+    glViewport(-window_width*view_hsplit, -(1.0+view_vsplit)*window_height/scaling_factor,
+                window_width, scaling_factor*(1.0-view_vsplit)*window_height);
+    widget_2d.position = glm::vec2(0.f, view_vsplit*window_height/(scaling_factor*scaling_factor));
+#else
     glViewport(0, 0, window_width, window_height);
-
     widget_2d.position = glm::vec2(0.f, view_vsplit*window_height);
+#endif
     widget_2d.size = glm::vec2(window_width*view_hsplit, (1.0-view_vsplit)*window_height);
     ret = widget_2d.post_draw(state.cage.keyframe_for_index(current_cut_index), is_2d_widget_in_focus());
 
@@ -360,10 +363,12 @@ bool Bounding_Polygon_Menu::post_draw() {
         ret = widget_3d.post_draw_curved(G4f(widget_3d_viewport), state.cage.keyframe_for_index(current_cut_index));
     }
 
+    float window_scaling_factor;
+    get_scaling_factor(&window_scaling_factor);
 
     ImGui::SetNextWindowBgAlpha(0.5f);
-    float window_height_float = static_cast<float>(window_height);
-    float window_width_float = static_cast<float>(window_width);
+    float window_height_float = static_cast<float>(window_height/window_scaling_factor);
+    float window_width_float = static_cast<float>(window_width/window_scaling_factor);
     ImGui::SetNextWindowPos(ImVec2(0.f, (1.0-view_vsplit)*window_height_float), ImGuiSetCond_Always);
     ImGui::SetNextWindowSize(ImVec2(window_width_float, window_height_float*view_vsplit), ImGuiSetCond_Always);
     ImGui::Begin("Select Boundary", nullptr,
@@ -401,6 +406,9 @@ bool Bounding_Polygon_Menu::post_draw() {
 
     ImGui::SameLine();
     ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+#ifdef __APPLE__
+    cursor_pos.x *= (1.0+keyframe_nudge_amount);
+#endif
     ImGui::PushItemWidth(ImGui::GetWindowWidth() - 2.f*cursor_pos.x);
     if(ImGui::SliderFloat("", &current_cut_index,
                           static_cast<float>(state.cage.min_index()),
@@ -493,16 +501,14 @@ bool Bounding_Polygon_Menu::post_draw() {
         }
     }
     if (show_edit_transfer_function) {
-        ImGui::SetNextWindowSize(ImVec2(window_width*view_vsplit, 0), ImGuiSetCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(window_width*view_vsplit/window_scaling_factor, 0), ImGuiSetCond_FirstUseEver);
         ImGui::Begin("Edit Transfer Function", &show_edit_transfer_function, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
         ImVec2 popup_pos = ImGui::GetWindowPos();
         ImVec2 popup_size = ImGui::GetWindowSize();
         tf_widget.post_draw(!show_save_popup /* active */);
 
-        double mouse_x, mouse_y;
-        glfwGetCursorPos(viewer->window, &mouse_x, &mouse_y);
-        bool in_window_x = (mouse_x >= popup_pos[0]) && (mouse_x <= (popup_pos[0] + popup_size[0]));
-        bool in_window_y = (mouse_y >= popup_pos[1]) && (mouse_y <= (popup_pos[1] + popup_size[1]));
+        bool in_window_x = (viewer->current_mouse_x >= popup_pos[0]) && (viewer->current_mouse_x <= (popup_pos[0] + popup_size[0]));
+        bool in_window_y = (viewer->current_mouse_y >= popup_pos[1]) && (viewer->current_mouse_y <= (popup_pos[1] + popup_size[1]));
         mouse_in_popup = (in_window_x && in_window_y);
 
         ImGui::Separator();
@@ -602,7 +608,7 @@ bool Bounding_Polygon_Menu::post_draw() {
         show_save_popup = true;
     }
     if (show_save_popup) {
-        post_draw_save(window_width);
+        post_draw_save(window_width/window_scaling_factor);
     }
     ImGui::End();
 

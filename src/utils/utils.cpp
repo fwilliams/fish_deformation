@@ -189,6 +189,41 @@ bool load_rawfile(const std::string& rawfilename, const Eigen::RowVector3i& dims
     return true;
 }
 
+void init_opengl_debug(GLDEBUGPROC callback) {
+#if !defined(__APPLE__)
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(callback, NULL);
+#endif
+}
+
+void push_gl_debug_group(const char* message) {
+#if !defined(__APPLE__)
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, message);
+#endif
+}
+
+void pop_gl_debug_group() {
+#if !defined(__APPLE__)
+    glPopDebugGroup();
+#endif
+}
+
+void get_window_size(GLFWwindow* handle, int* width, int* height) {
+    float window_scale;
+    get_scaling_factor(&window_scale);
+    glfwGetWindowSize(handle, width, height);
+    // Provides proper scaling for window dimensions on macOS
+    *width *= window_scale, *height *= window_scale;
+}
+
+void get_scaling_factor(float* scaling) {
+    // int count;
+    // GLFWmonitor** monitors = glfwGetMonitors(&count);  
+    // glfwGetMonitorContentScale(monitors[1], scaling, NULL); 
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    glfwGetMonitorContentScale(primary, scaling, NULL);    
+}
+
 void edge_endpoints(const Eigen::MatrixXd& V,
                     const Eigen::MatrixXi& F,
                     Eigen::MatrixXd& V1,

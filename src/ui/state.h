@@ -160,8 +160,6 @@ struct State {
         std::vector<std::pair<int, int>> endpoint_pairs;
     } skeleton_estimation_parameters;
 
-
-
     void load_volume_data(LoadedVolume& volume, std::string prefix, bool load_topology);
 
     BoundingCage cage;

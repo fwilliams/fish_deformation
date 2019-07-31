@@ -39,6 +39,24 @@ public:
     float split_point_size = 7.f;
     float center_point_size = 12.f;
     float selected_center_point_size = 14.f;
+#ifdef __APPLE__
+    // Ensures full coverage of macOS 2D widget window over the entire area for selection and
+    // rendering covered by 2D widget viewer by scaling up the 2D widget size, which is many 
+    // times smaller than usual since larger widget size values causes the widget view to zoom
+    // out into multiple slice views, ruining the widget display. The value of 4.0 was chosen 
+    // as it was the minimum factor by which the diminished 2D widget size needed to be scaled 
+    // up in order to achieve this effect. The y dimension of the 2D widget size was chosen to be
+    // scaled up due to its more flexible smaller value, dictating the size of the scaling factor.
+    float macos_widget_scaling_factor = 4.f;
+    // Ensures mouse coordinates on the y scale (vertical dimension) are properly normalized to
+    // synchronize with y coordinates of bounding box vertices for ease of box area selection. 
+    // When used on MacOS, the y mouse coordinates of the cursor are out of sync with the actual 
+    // y coordinates of points in relation to the bounds of the widget view. The value of 0.8 was 
+    // chosen since that was the scaling factor needed to correct the imbalance, as the magnitudes
+    // of the incorrect mouse y coordinates were 1.25 larger than they should have been. With this
+    // correction factor, the bounding box selection process by the user works as expected.
+    float mouse_coord_scaling_factor = 0.8f;
+#endif
 
     glm::vec4 rotation_handle_reference_color = glm::vec4(0.5f, 0.5f, 0.2f, 1.0f);
     glm::vec4 rotation_handle_color = glm::vec4(0.9f, 0.9f, 0.2f, 1.0f);

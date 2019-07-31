@@ -180,7 +180,7 @@ bool Meshing_Menu::post_draw() {
     if (is_meshing) {
         int width;
         int height;
-        glfwGetWindowSize(viewer->window, &width, &height);
+        get_window_size(viewer->window, &width, &height);
         ImGui::SetNextWindowPos(ImVec2(0.f, 0.f), ImGuiSetCond_Always);
         float w = static_cast<float>(width);
         float h = static_cast<float>(height);

@@ -1,3 +1,4 @@
+#include "state.h"
 #include "fish_ui_viewer_plugin.h"
 
 #include <igl/project.h>
