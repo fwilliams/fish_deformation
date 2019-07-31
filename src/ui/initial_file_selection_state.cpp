@@ -113,8 +113,8 @@ bool Initial_File_Selection_Menu::post_draw() {
         ImGui::SameLine();
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
         if (ImGui::Button("Select##FirstScan")) {
-            std::string first_scan = open_image_file_dialog();
-            if (first_scan.size() > 0) {
+            // std::string first_scan = open_image_file_dialog();
+            std::string first_scan = "/Users/michaelzhou/Desktop/PtapinBMP/Plaagiotremus_tapinosoma_9.9um_2k__rec_Tra0002.bmp";            if (first_scan.size() > 0) {
                 strcpy(first_image_path_buf, first_scan.c_str());
                 _state.dirty_flags.file_loading_dirty = true;
                 fix_path(first_image_path_buf);
@@ -134,8 +134,8 @@ bool Initial_File_Selection_Menu::post_draw() {
         ImGui::SameLine();
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
         if (ImGui::Button("Select##LastScan")) {
-            std::string last_scan = open_image_file_dialog();
-            if (last_scan.size() > 0) {
+            // std::string last_scan = open_image_file_dialog();
+            std::string last_scan = "/Users/michaelzhou/Desktop/PtapinBMP/Plaagiotremus_tapinosoma_9.9um_2k__rec_Tra1798.bmp";            if (last_scan.size() > 0) {
                 strcpy(last_image_path_buf, last_scan.c_str());
                 _state.dirty_flags.file_loading_dirty = true;
                 fix_path(last_image_path_buf);
@@ -154,7 +154,8 @@ bool Initial_File_Selection_Menu::post_draw() {
         ImGui::SameLine();
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
         if (ImGui::Button("Select##Outfolder")) {
-            std::string folder = open_folder_dialog();
+            // std::string folder = open_folder_dialog();
+            std::string folder = "/Users/michaelzhou/Desktop/FishScanResults";
             if (folder.size() > 0) {
                 strcpy(output_dir_path_buf, folder.c_str());
                 _state.dirty_flags.file_loading_dirty = true;

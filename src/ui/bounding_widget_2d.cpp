@@ -145,13 +145,12 @@ struct BlitData {
 Bounding_Polygon_Widget::Bounding_Polygon_Widget(State& state) : state(state) {}
 
 glm::vec2 Bounding_Polygon_Widget::convert_position_mainwindow_to_keyframe(const glm::vec2& p) const {
-#ifdef __APPLE__    
-    glm::vec2 window_ll = glm::vec2(position.x, size.y);
-    glm::vec2 window_ur = window_ll + glm::vec2(macos_widget_scaling_factor*size.x, macos_widget_scaling_factor*macos_widget_scaling_factor*size.y);
+#ifdef __APPLE__
+    const glm::vec2 window_ll = glm::vec2(position.x, macos_widget_scaling_factor*position.y);
 #else
-    glm::vec2 window_ll = position;
-    glm::vec2 window_ur = position + size;
+    const glm::vec2 window_ll = position;
 #endif
+    const glm::vec2 window_ur = window_ll + size;
     // Map mouse into [0, 1]^2 in the subwindow
     glm::vec2 normalized_mouse = (p - window_ll) / (window_ur - window_ll);
 
@@ -177,12 +176,11 @@ bool Bounding_Polygon_Widget::is_point_in_widget(glm::ivec2 p) const {
 
     const glm::ivec2 p_tx(p.x, window_height - p.y);
 #ifdef __APPLE__
-    glm::vec2 ll = glm::vec2(position.x, size.y);
-    glm::vec2 ur = ll + glm::vec2(macos_widget_scaling_factor*size.x, macos_widget_scaling_factor*macos_widget_scaling_factor*size.y);
+    const glm::vec2 ll = glm::vec2(position.x, macos_widget_scaling_factor*position.y);
 #else
-    const glm::ivec2 ll = position;
-    const glm::ivec2 ur = position + size;
+    const glm::vec2 ll = position;
 #endif
+    const glm::vec2 ur = ll + size;
     return p_tx.x >= ll.x && p_tx.x <= ur.x && p_tx.y >= ll.y && p_tx.y <= ur.y;
 }
 
@@ -677,14 +675,14 @@ bool Bounding_Polygon_Widget::post_draw(BoundingCage::KeyFrameIterator kf, bool 
     {
         int width;
         int height;
-        glfwGetWindowSize(viewer->window, &width, &height);
+        get_window_size(viewer->window, &width, &height);
 
         glUseProgram(blit.program);
         glBindVertexArray(blit.vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, blit.vbo);
         {
-            glm::vec2 size_ndc = size / glm::vec2(width, height) * 2.f;
+            glm::vec2 size_ndc = size / glm::vec2(width, height) * glm::vec2(2.f, 1.f);
             glm::vec2 pos_ndc = (position / glm::vec2(width, height) - glm::vec2(0.5)) * 2.f;
 
             BlitData box_ll = {

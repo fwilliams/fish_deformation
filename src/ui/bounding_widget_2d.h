@@ -43,13 +43,11 @@ public:
     // Ensures full coverage of macOS 2D widget window over the entire area for selection and
     // rendering covered by 2D widget viewer by scaling up the 2D widget size, which is many 
     // times smaller than usual since larger widget size values causes the widget view to zoom
-    // out into multiple slice views, ruining the widget display. The value of 2.0 was chosen 
+    // out into multiple slice views, ruining the widget display. The value of 4.0 was chosen 
     // as it was the minimum factor by which the diminished 2D widget size needed to be scaled 
-    // up in order to achieve this effect. The window is 1280 pixels wide and 1132.8 pixels tall
-    // while the area covered by the 2D widget size is initially set at 283.2 pixels tall and 
-    // 640 pixels wide. The y dimension of the 2D widget size (283.2 pixels) was chosen to be 
+    // up in order to achieve this effect. The y dimension of the 2D widget size was chosen to be
     // scaled up due to its more flexible smaller value, dictating the size of the scaling factor.
-    float macos_widget_scaling_factor = 2.f;
+    float macos_widget_scaling_factor = 4.f;
     // Ensures mouse coordinates on the y scale (vertical dimension) are properly normalized to
     // synchronize with y coordinates of bounding box vertices for ease of box area selection. 
     // When used on MacOS, the y mouse coordinates of the cursor are out of sync with the actual 

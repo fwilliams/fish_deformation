@@ -52,6 +52,8 @@ void pop_gl_debug_group();
 
 void get_window_size(GLFWwindow* handle, int* width, int* height);
 
+void get_scaling_factor(float* scaling);
+
 void edge_endpoints(const Eigen::MatrixXd& V,
                     const Eigen::MatrixXi& F,
                     Eigen::MatrixXd& V1,

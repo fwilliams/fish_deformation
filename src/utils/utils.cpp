@@ -209,11 +209,19 @@ void pop_gl_debug_group() {
 }
 
 void get_window_size(GLFWwindow* handle, int* width, int* height) {
+    float window_scale;
+    get_scaling_factor(&window_scale);
     glfwGetWindowSize(handle, width, height);
-#ifdef __APPLE__
     // Provides proper scaling for window dimensions on macOS
-    *width *= 2, *height *= 2;
-#endif
+    *width *= window_scale, *height *= window_scale;
+}
+
+void get_scaling_factor(float* scaling) {
+    // int count;
+    // GLFWmonitor** monitors = glfwGetMonitors(&count);  
+    // glfwGetMonitorContentScale(monitors[1], scaling, NULL); 
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    glfwGetMonitorContentScale(primary, scaling, NULL);    
 }
 
 void edge_endpoints(const Eigen::MatrixXd& V,

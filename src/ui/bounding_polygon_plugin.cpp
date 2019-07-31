@@ -346,13 +346,12 @@ bool Bounding_Polygon_Menu::post_draw() {
 #ifdef __APPLE__
     glViewport(-window_width*view_hsplit, -(1.0+view_vsplit)*window_height/scaling_factor,
                 window_width, scaling_factor*(1.0-view_vsplit)*window_height);
-    widget_2d.position = glm::vec2(0.f, view_vsplit*window_height/(scaling_factor*scaling_factor*scaling_factor));
-    widget_2d.size = glm::vec2(window_width*view_hsplit/scaling_factor, (1.0-view_vsplit)*window_height/(scaling_factor*scaling_factor));
+    widget_2d.position = glm::vec2(0.f, view_vsplit*window_height/(scaling_factor*scaling_factor));
 #else
     glViewport(0, 0, window_width, window_height);
     widget_2d.position = glm::vec2(0.f, view_vsplit*window_height);
-    widget_2d.size = glm::vec2(window_width*view_hsplit, (1.0-view_vsplit)*window_height);
 #endif
+    widget_2d.size = glm::vec2(window_width*view_hsplit, (1.0-view_vsplit)*window_height);
     ret = widget_2d.post_draw(state.cage.keyframe_for_index(current_cut_index), is_2d_widget_in_focus());
 
     Eigen::Vector4f widget_3d_viewport(view_hsplit*window_width, view_vsplit*window_height,
@@ -364,13 +363,12 @@ bool Bounding_Polygon_Menu::post_draw() {
         ret = widget_3d.post_draw_curved(G4f(widget_3d_viewport), state.cage.keyframe_for_index(current_cut_index));
     }
 
+    float window_scaling_factor;
+    get_scaling_factor(&window_scaling_factor);
 
     ImGui::SetNextWindowBgAlpha(0.5f);
-    float window_height_float = static_cast<float>(window_height);
-    float window_width_float = static_cast<float>(window_width);
-#ifdef __APPLE__
-    window_height_float /= scaling_factor, window_width_float /= scaling_factor;
-#endif
+    float window_height_float = static_cast<float>(window_height/window_scaling_factor);
+    float window_width_float = static_cast<float>(window_width/window_scaling_factor);
     ImGui::SetNextWindowPos(ImVec2(0.f, (1.0-view_vsplit)*window_height_float), ImGuiSetCond_Always);
     ImGui::SetNextWindowSize(ImVec2(window_width_float, window_height_float*view_vsplit), ImGuiSetCond_Always);
     ImGui::Begin("Select Boundary", nullptr,
@@ -503,7 +501,7 @@ bool Bounding_Polygon_Menu::post_draw() {
         }
     }
     if (show_edit_transfer_function) {
-        ImGui::SetNextWindowSize(ImVec2(window_width*view_vsplit, 0), ImGuiSetCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(window_width*view_vsplit/window_scaling_factor, 0), ImGuiSetCond_FirstUseEver);
         ImGui::Begin("Edit Transfer Function", &show_edit_transfer_function, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
         ImVec2 popup_pos = ImGui::GetWindowPos();
         ImVec2 popup_size = ImGui::GetWindowSize();
@@ -610,7 +608,7 @@ bool Bounding_Polygon_Menu::post_draw() {
         show_save_popup = true;
     }
     if (show_save_popup) {
-        post_draw_save(window_width);
+        post_draw_save(window_width/window_scaling_factor);
     }
     ImGui::End();
 
