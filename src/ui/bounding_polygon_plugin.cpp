@@ -399,9 +399,6 @@ bool Bounding_Polygon_Menu::post_draw() {
 
     ImGui::SameLine();
     ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-#ifdef __APPLE__
-    cursor_pos.x *= (1.0+keyframe_nudge_amount);
-#endif
     ImGui::PushItemWidth(ImGui::GetWindowWidth() - 2.f*cursor_pos.x);
     if(ImGui::SliderFloat("", &current_cut_index,
                           static_cast<float>(state.cage.min_index()),
