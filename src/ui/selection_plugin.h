@@ -18,6 +18,7 @@ public:
     void deinitialize();
 
     bool key_down(int key, int modifiers) override;
+    bool mouse_down(int button, int modifier) override;
     bool post_draw() override;
 
 private:
@@ -33,6 +34,10 @@ private:
 
     Parameters rendering_params;
     SelectionRenderer selection_renderer;
+
+    double mouse_down_time = 0.0;
+    double mouse_click_threshold = 0.2;
+    bool is_first_button_down = false;
 
     glm::vec2 clicked_mouse_position = { 0.f, 0.f };
     bool is_currently_interacting = false;

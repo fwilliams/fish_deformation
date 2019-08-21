@@ -212,6 +212,28 @@ bool Selection_Menu::key_down(int key, int modifiers) {
     return false;
 }
 
+bool Selection_Menu::mouse_down(int button, int modifier) {
+    double current_press_time = glfwGetTime();
+    bool left_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+    bool right_mouse = glfwGetMouseButton(viewer->window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+    if (left_mouse || right_mouse) {
+        if (!is_first_button_down) {
+            is_first_button_down = left_mouse || right_mouse;
+            mouse_down_time = current_press_time;
+        }
+        else {
+            double delta_time = current_press_time - mouse_down_time;
+            mouse_down_time = 0.0;
+            is_first_button_down = false;
+            if (delta_time < mouse_click_threshold) { // CLICK
+                should_select = true;
+                return true;
+            }
+        }
+    } 
+    return false;
+}
+
 bool Selection_Menu::post_draw() {
     bool ret = FishUIViewerPlugin::post_draw();
 
